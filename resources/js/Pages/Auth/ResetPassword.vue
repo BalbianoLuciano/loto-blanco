@@ -1,97 +1,51 @@
 <script setup lang="ts">
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/components/InputError.vue';
-import InputLabel from '@/components/InputLabel.vue';
-import PrimaryButton from '@/components/PrimaryButton.vue';
-import TextInput from '@/components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue'
+import { Head, useForm } from '@inertiajs/vue3'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { trans } from 'laravel-vue-i18n'
 
-const props = defineProps<{
-    email: string;
-    token: string;
-}>();
+const props = defineProps<{ email: string; token: string }>()
 
 const form = useForm({
     token: props.token,
     email: props.email,
     password: '',
     password_confirmation: '',
-});
+})
 
-const submit = () => {
-    form.post(route('password.store'), {
-        onFinish: () => {
-            form.reset('password', 'password_confirmation');
-        },
-    });
-};
+function submit() {
+    form.post(route('password.store'), { onFinish: () => form.reset('password', 'password_confirmation') })
+}
 </script>
 
 <template>
     <GuestLayout>
-        <Head title="Reset Password" />
+        <Head :title="trans('Password')" />
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+        <form @submit.prevent="submit" class="space-y-4">
+            <div class="space-y-2">
+                <Label for="email">{{ trans('Email') }}</Label>
+                <Input id="email" v-model="form.email" type="email" required autocomplete="username" />
+                <p v-if="form.errors.email" class="text-sm text-destructive">{{ form.errors.email }}</p>
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
+            <div class="space-y-2">
+                <Label for="password">{{ trans('Password') }}</Label>
+                <Input id="password" v-model="form.password" type="password" required autofocus autocomplete="new-password" />
+                <p v-if="form.errors.password" class="text-sm text-destructive">{{ form.errors.password }}</p>
             </div>
 
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
+            <div class="space-y-2">
+                <Label for="password_confirmation">{{ trans('Confirm Password') }}</Label>
+                <Input id="password_confirmation" v-model="form.password_confirmation" type="password" required autocomplete="new-password" />
+                <p v-if="form.errors.password_confirmation" class="text-sm text-destructive">{{ form.errors.password_confirmation }}</p>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Reset Password
-                </PrimaryButton>
-            </div>
+            <Button type="submit" class="w-full" :disabled="form.processing">
+                {{ trans('Save') }}
+            </Button>
         </form>
     </GuestLayout>
 </template>
