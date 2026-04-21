@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+    ],
+
+    'moonshot' => [
+        'api_key' => env('MOONSHOT_API_KEY'),
+        'base_url' => env('MOONSHOT_BASE_URL', 'https://api.moonshot.cn/v1'),
+        'model' => env('MOONSHOT_MODEL', 'kimi-k2'),
+    ],
+
+    'python_svc' => [
+        'url' => env('PYTHON_SVC_URL'),
+    ],
+
 ];
