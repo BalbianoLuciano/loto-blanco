@@ -1,52 +1,35 @@
-# Material académico local (copyright, no publicar)
-/Matematicas/
-/Programacion1/
-/ArquitecturaYSistemasDeGestion/
-/OrganizacionEmpresarial/
-
-# Legacy docs del proyecto previo (borrar cuando el nuevo workflow esté estable)
-/docs/
-
-# Laravel / PHP
-/vendor/
-/storage/*.key
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-/storage/logs/*
-/bootstrap/cache/*
-.phpunit.result.cache
-.phpunit.cache/
-
-# Node
-/node_modules/
-/public/build/
-/public/hot
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Python microservice
-/python-svc/__pycache__/
-/python-svc/.venv/
-/python-svc/*.pyc
-
-# Env & secrets
-.env
-.env.*
-!.env.example
-
-# Editors / OS
-.idea/
-.vscode/
+*.log
 .DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
 Thumbs.db
 
-# Build artifacts
-/dist/
-/build/
-*.log
+# Academic content (local fixtures, not for public repo)
+/Matematicas
+/Programacion1
+/ArquitecturaYSistemasDeGestion
+/OrganizacionEmpresarial
 
-# Fixtures locales (PDFs de prueba sin subir)
-/fixtures/pdfs/
+# SQLite (dev only, using Postgres via Sail)
+/database/*.sqlite
+/database/*.sqlite-*
