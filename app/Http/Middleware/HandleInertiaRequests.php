@@ -34,6 +34,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'subjects_nav' => fn () => $request->user()
+                ? $request->user()->subjects()->where('archived', false)->get(['id', 'name', 'element', 'color'])
+                : [],
+            'locale' => fn () => app()->getLocale(),
         ];
     }
 }

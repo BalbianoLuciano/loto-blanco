@@ -1,198 +1,232 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import ApplicationLogo from '@/components/ApplicationLogo.vue';
-import Dropdown from '@/components/Dropdown.vue';
-import DropdownLink from '@/components/DropdownLink.vue';
-import NavLink from '@/components/NavLink.vue';
-import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, computed } from 'vue'
+import { Link, usePage, router } from '@inertiajs/vue3'
+import { trans } from 'laravel-vue-i18n'
+import { useDarkMode } from '@/composables/useDarkMode'
+import { provideElementTheme, type Element } from '@/composables/useElementTheme'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+} from '@/components/ui/sheet'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
+    Flower, Sun, Moon, Menu, Languages,
+    LayoutDashboard, BookOpen, User, LogOut, Settings,
+    Droplet, Flame, Mountain, Wind,
+} from 'lucide-vue-next'
 
-const showingNavigationDropdown = ref(false);
+const props = withDefaults(defineProps<{
+    element?: Element
+}>(), {
+    element: 'lotus',
+})
+
+const page = usePage()
+const { isDark, toggleDark } = useDarkMode()
+const currentElement = provideElementTheme(props.element)
+const mobileOpen = ref(false)
+
+const user = computed(() => page.props.auth.user as { name: string; email: string })
+const initials = computed(() => {
+    const parts = user.value.name.split(' ')
+    return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2)
+})
+
+const elementIcons: Record<string, typeof Droplet> = {
+    water: Droplet, fire: Flame, earth: Mountain, air: Wind, lotus: Flower,
+}
+
+const subjects = computed(() => {
+    const s = (page.props as any).subjects_nav
+    return Array.isArray(s) ? s : []
+})
+
+function logout() {
+    router.post(route('logout'))
+}
+
+function toggleLocale() {
+    // TODO: call backend to switch locale, for now just toggle
+    const current = document.documentElement.lang
+    const next = current === 'es' ? 'en' : 'es'
+    document.documentElement.lang = next
+}
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
-                                </Link>
-                            </div>
+    <div :data-element="currentElement" class="min-h-screen bg-background text-foreground transition-colors duration-300">
+        <!-- Navbar -->
+        <nav class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-14 items-center justify-between">
+                    <!-- Left: Logo + Nav -->
+                    <div class="flex items-center gap-6">
+                        <Link :href="route('dashboard')" class="flex items-center gap-2">
+                            <Flower class="h-6 w-6 text-primary" />
+                            <span class="hidden font-semibold sm:inline">Loto Blanco</span>
+                        </Link>
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                        <Separator orientation="vertical" class="hidden h-6 sm:block" />
+
+                        <!-- Desktop Nav -->
+                        <div class="hidden items-center gap-1 sm:flex">
+                            <Link :href="route('dashboard')">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    :class="route().current('dashboard') ? 'bg-accent' : ''"
                                 >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
+                                    <LayoutDashboard class="mr-1.5 h-4 w-4" />
+                                    {{ trans('Dashboard') }}
+                                </Button>
+                            </Link>
+                            <Link :href="route('subjects.index')">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    :class="route().current('subjects.*') ? 'bg-accent' : ''"
                                 >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
+                                    <BookOpen class="mr-1.5 h-4 w-4" />
+                                    {{ trans('Subjects') }}
+                                </Button>
+                            </Link>
                         </div>
                     </div>
-                </div>
 
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
-                >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-1">
+                        <TooltipProvider :delay-duration="300">
+                            <!-- Language toggle -->
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <Button variant="ghost" size="icon" class="h-9 w-9" @click="toggleLocale">
+                                        <Languages class="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{{ trans('Language') }}</TooltipContent>
+                            </Tooltip>
+
+                            <!-- Dark mode toggle -->
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <Button variant="ghost" size="icon" class="h-9 w-9" @click="toggleDark()">
+                                        <Sun v-if="isDark" class="h-4 w-4" />
+                                        <Moon v-else class="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{{ isDark ? trans('Light') : trans('Dark') }}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <!-- User dropdown (desktop) -->
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button variant="ghost" class="hidden gap-2 sm:flex">
+                                    <Avatar class="h-7 w-7">
+                                        <AvatarFallback class="text-xs">{{ initials }}</AvatarFallback>
+                                    </Avatar>
+                                    <span class="text-sm">{{ user.name }}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" class="w-48">
+                                <DropdownMenuItem as-child>
+                                    <Link :href="route('profile.edit')" class="flex items-center gap-2">
+                                        <Settings class="h-4 w-4" />
+                                        {{ trans('Profile') }}
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem @click="logout" class="flex items-center gap-2 text-destructive">
+                                    <LogOut class="h-4 w-4" />
+                                    {{ trans('Log Out') }}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <!-- Mobile hamburger -->
+                        <Sheet v-model:open="mobileOpen">
+                            <SheetTrigger as-child>
+                                <Button variant="ghost" size="icon" class="h-9 w-9 sm:hidden">
+                                    <Menu class="h-5 w-5" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" class="w-72">
+                                <div class="flex flex-col gap-4 pt-6">
+                                    <div class="flex items-center gap-3 px-2">
+                                        <Avatar class="h-10 w-10">
+                                            <AvatarFallback>{{ initials }}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p class="text-sm font-medium">{{ user.name }}</p>
+                                            <p class="text-xs text-muted-foreground">{{ user.email }}</p>
+                                        </div>
+                                    </div>
+
+                                    <Separator />
+
+                                    <div class="flex flex-col gap-1">
+                                        <Link :href="route('dashboard')" @click="mobileOpen = false">
+                                            <Button variant="ghost" class="w-full justify-start">
+                                                <LayoutDashboard class="mr-2 h-4 w-4" />
+                                                {{ trans('Dashboard') }}
+                                            </Button>
+                                        </Link>
+                                        <Link :href="route('subjects.index')" @click="mobileOpen = false">
+                                            <Button variant="ghost" class="w-full justify-start">
+                                                <BookOpen class="mr-2 h-4 w-4" />
+                                                {{ trans('Subjects') }}
+                                            </Button>
+                                        </Link>
+                                    </div>
+
+                                    <Separator />
+
+                                    <div class="flex flex-col gap-1">
+                                        <Link :href="route('profile.edit')" @click="mobileOpen = false">
+                                            <Button variant="ghost" class="w-full justify-start">
+                                                <Settings class="mr-2 h-4 w-4" />
+                                                {{ trans('Profile') }}
+                                            </Button>
+                                        </Link>
+                                        <Button variant="ghost" class="w-full justify-start text-destructive" @click="logout">
+                                            <LogOut class="mr-2 h-4 w-4" />
+                                            {{ trans('Log Out') }}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
                     </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
-                    >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
                 </div>
-            </nav>
+            </div>
+        </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
-            </header>
+        <!-- Page Heading -->
+        <header v-if="$slots.header" class="border-b border-border bg-card">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <slot name="header" />
+            </div>
+        </header>
 
-            <!-- Page Content -->
-            <main>
-                <slot />
-            </main>
-        </div>
+        <!-- Page Content -->
+        <main>
+            <slot />
+        </main>
     </div>
 </template>
