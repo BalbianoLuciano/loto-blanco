@@ -32,7 +32,7 @@ El sistema tiene **5 elementos** (no 3 como se mencionaba inicialmente). Se apli
 
 ## Color tokens
 
-Todos los colores están en **OKLCH** (perceptualmente uniforme, mejor para gradientes y accesibilidad). Son CSS custom properties, mapeables a Tailwind v4 con `@theme inline`.
+Todos los colores están en **OKLCH** (perceptualmente uniforme, mejor para gradientes y accesibilidad). Son CSS custom properties nativas — **Tailwind v4 las consume directamente** sin necesidad de `tailwind.config.js`. Se declaran en `:root`/`.dark` y los element themes las sobreescriben via `[data-element]`.
 
 ### Tokens base (tema global)
 
@@ -402,45 +402,60 @@ Sugeridos por elemento:
 
 ---
 
-## Guía de migración a Vue/Inertia
+## Guía de migración a Vue/Inertia (con Tailwind v4 + Sail)
 
-### 1. Setup inicial
+### 1. Setup inicial (via Laravel Sail)
+
+Breeze ya instala Vue 3, Inertia, TypeScript y Tailwind CSS v4. Dependencias adicionales:
+
 ```bash
-# En el nuevo proyecto Laravel
-npm install @inertiajs/vue3 vue@latest
-npm install -D @vitejs/plugin-vue
-npm install -D tailwindcss@next @tailwindcss/postcss@next
-npm install tw-animate-css motion-v lucide-vue-next
-npm install @fontsource-variable/geist @fontsource-variable/geist-mono
+sail npm install tw-animate-css motion-v lucide-vue-next
+sail npm install @fontsource-variable/geist @fontsource-variable/geist-mono
+sail npm install laravel-vue-i18n @vueuse/core
 ```
 
-### 2. Copiar tokens
-Mover todo el contenido de `globals.css` (colores, elementos, radios) a `resources/css/app.css`.
+### 2. Tailwind v4 — configuración via CSS (NO tailwind.config.js)
 
-### 3. Instalar shadcn-vue
-```bash
-npx shadcn-vue@latest init
-# Confirmar: neutral base color, CSS variables, alias como los listados arriba
-```
+Tailwind v4 elimina el archivo `tailwind.config.js`. Todo se configura en CSS con `@theme`:
 
-### 4. Crear provider elemental
-Crear `resources/js/composables/useElementTheme.ts` como se mostró arriba.
-Crear `resources/js/components/theme/ElementThemeProvider.vue` como wrapper.
-
-### 5. Layouts
-Envolver `AppLayout.vue` principal con `<ElementThemeProvider>`. Lo setea según la materia activa en la ruta.
-
-### 6. Fuentes
-En `resources/css/app.css`:
 ```css
+/* resources/css/app.css */
+@import 'tailwindcss';
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 
-:root {
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-geist-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
 }
 ```
+
+Los color tokens se definen como CSS custom properties normales (`:root` y `.dark`) y se referencian en las clases via `@theme inline` o directamente en los componentes shadcn-vue.
+
+### 3. Copiar tokens de color
+Mover todos los tokens OKLCH (sección "Color tokens" de este doc) a `resources/css/app.css` dentro de `:root` y `.dark`. Los element themes van como `[data-element="water"]` etc.
+
+### 4. Instalar shadcn-vue
+```bash
+sail npx shadcn-vue@latest init
+# Confirmar: neutral base color, CSS variables, alias como los listados arriba
+```
+
+### 5. Crear provider elemental
+Crear `resources/js/composables/useElementTheme.ts` como se mostró arriba.
+Crear `resources/js/components/theme/ElementThemeProvider.vue` como wrapper.
+
+### 6. Layouts
+Envolver `AppLayout.vue` principal con `<ElementThemeProvider>`. Lo setea según la materia activa en la ruta.
+
+### 7. Fuentes
+Ya incluidas en el `@import` del paso 2. Las variables `--font-sans` y `--font-mono` se registran en `@theme inline` para que Tailwind las use con `font-sans` y `font-mono`.
 
 ---
 

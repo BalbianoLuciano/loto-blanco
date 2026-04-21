@@ -16,7 +16,8 @@ Luciano (alumno de **UTN FRRe** / TUP) tiene poquísimo tiempo y material acadé
 |---|---|
 | Modelo | SaaS hospedado multi-tenant, 100% gratuito |
 | Licencia | **AGPLv3** (protección contra re-hosting comercial) |
-| Stack | Laravel 11 + Inertia + Vue 3 + shadcn-vue + Tailwind |
+| Stack | Laravel 11 + Inertia + Vue 3 + shadcn-vue + Tailwind v4 |
+| Dev environment | Laravel Sail (Docker) |
 | DB | Postgres 16 + pgvector |
 | Branding | Loto Blanco (paleta, tipografía, logos, emblemas, layouts existentes) |
 | Gamificación | Sistema de logros basado en emblemas Agua / Fuego / Tierra |
@@ -72,7 +73,13 @@ Bilingüe ES/EN desde día uno. Razón: el usuario valora que los alumnos salgan
 8. **Web Push VAPID** — notificaciones gratis (`minishlink/web-push`).
 9. **Filament** — panel admin embebido.
 
-### Hosting
+### Entorno de desarrollo
+- **Laravel Sail** — Docker-based, sin necesidad de PHP/Node/Postgres local.
+- Servicios: app (PHP 8.4), pgsql (Postgres 16 + pgvector custom), redis, meilisearch.
+- Comandos: `sail up -d`, `sail artisan`, `sail npm`, `sail composer`.
+- Dockerfile custom `docker/pgsql/` para pgvector extension.
+
+### Hosting (producción)
 - Hetzner CPX21 (~€6/mes) + Cloudflare DNS/R2.
 - Docker Compose: app, postgres, redis, python-svc.
 
@@ -133,13 +140,20 @@ Eventos del sistema (ejercicio resuelto, flashcard revisada, topic completado, P
 ## Fases de implementación
 
 ### Fase 0 — Bootstrap (1-2 días)
-- Repo limpio: `laravel new loto-blanco --inertia`
-- Vue 3 + shadcn-vue + Tailwind configurado
-- `docker-compose.yml`: app, postgres16+pgvector, redis, minio, python-svc
+- `composer create-project laravel/laravel loto-blanco`
+- Laravel Sail: `composer require laravel/sail --dev` + `sail:install --with=pgsql,redis,meilisearch`
+- Dockerfile custom `docker/pgsql/` con pgvector
+- Laravel Breeze: Vue 3 + Inertia + TypeScript + Pest
+- Tailwind CSS v4 (viene con Breeze, usa `@import` en CSS, sin tailwind.config.js)
+- shadcn-vue inicializado + componentes base
 - Filament instalado para admin
-- Fortify auth
+- Dependencias PHP: Horizon, Reverb, Socialite, web-push, log-viewer
+- Dependencias NPM: Geist fonts, lucide-vue-next, laravel-vue-i18n, motion-v, tw-animate-css, @vueuse/core
+- Design system: tokens OKLCH en `resources/css/app.css` + composable tema elemental
 - `laravel-vue-i18n` + archivos `es.json`, `en.json`
 - LICENSE (AGPLv3) + README inicial
+- Design assets copiados a `public/images/`
+- GitHub repo: `BalbianoLuciano/loto-blanco` (público)
 - CI GitHub Actions: Pest + Vitest
 - Sentry + Uptime Kuma
 
@@ -181,11 +195,12 @@ Eventos del sistema (ejercicio resuelto, flashcard revisada, topic completado, P
 | Capa | Elección |
 |---|---|
 | Framework | Laravel 11 |
-| Frontend | Vue 3 + Inertia + shadcn-vue + Tailwind + TypeScript |
+| Frontend | Vue 3 + Inertia + shadcn-vue + Tailwind CSS v4 + TypeScript |
+| Dev env | Laravel Sail (Docker: PHP 8.4, Postgres, Redis, MeiliSearch) |
 | DB | Postgres 16 + pgvector (ext) |
 | Queue | Redis + Horizon |
 | Storage | Cloudflare R2 |
-| Auth | Fortify + Sanctum |
+| Auth | Breeze (Vue + Inertia) → evaluar migrar a Fortify + Sanctum |
 | Realtime | Laravel Reverb (WebSockets self-hosted) |
 | LLM | Moonshot Kimi K2 API (directa) |
 | Embeddings | OpenAI `text-embedding-3-small` |
