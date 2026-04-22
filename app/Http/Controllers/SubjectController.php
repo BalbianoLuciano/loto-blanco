@@ -53,9 +53,28 @@ class SubjectController extends Controller
         $this->authorizeSubject($request, $subject);
 
         $subject->load(['topics', 'documents' => fn ($q) => $q->latest()]);
+        $subject->loadCount(['exercises', 'documents']);
+
+        $mastery = $subject->topics->map(function ($topic) use ($request) {
+            $m = \App\Models\Mastery::where('user_id', $request->user()->id)
+                ->where('topic_id', $topic->id)
+                ->first();
+
+            return [
+                'topic_id' => $topic->id,
+                'topic_name' => $topic->name,
+                'stability' => $m?->stability ?? 0,
+                'difficulty' => $m?->difficulty ?? 0.3,
+                'state' => $m?->state ?? 'new',
+                'due_at' => $m?->due_at,
+                'reps' => $m?->reps ?? 0,
+            ];
+        });
 
         return Inertia::render('Subjects/Show', [
             'subject' => $subject,
+            'mastery' => $mastery,
+            'exercisesCount' => $subject->exercises_count,
         ]);
     }
 

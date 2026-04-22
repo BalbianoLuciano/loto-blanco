@@ -32,14 +32,14 @@ import {
 } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{
-    element?: Element
+    element?: string
 }>(), {
     element: 'lotus',
 })
 
 const page = usePage()
 const { isDark, toggleDark } = useDarkMode()
-const currentElement = provideElementTheme(props.element)
+const currentElement = provideElementTheme(props.element as any)
 const mobileOpen = ref(false)
 
 const user = computed(() => page.props.auth.user as { name: string; email: string })

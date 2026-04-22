@@ -18,6 +18,10 @@ interface Subject {
     color: string
 }
 
+const props = defineProps<{
+    dueFlashcards: number
+}>()
+
 const page = usePage()
 
 const subjects = computed(() => {
@@ -81,7 +85,7 @@ const greeting = computed(() => {
                                 <Calendar class="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <p class="text-2xl font-bold">0</p>
+                                <p class="text-2xl font-bold">{{ props.dueFlashcards }}</p>
                                 <p class="text-sm text-muted-foreground">{{ trans('Due today') }}</p>
                             </div>
                         </CardContent>
