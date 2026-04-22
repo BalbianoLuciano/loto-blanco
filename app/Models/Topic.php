@@ -23,4 +23,14 @@ class Topic extends Model
     {
         return $this->hasMany(Document::class);
     }
+
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
+
+    public function flashcards(): HasMany
+    {
+        return $this->hasMany(Flashcard::class);
+    }
 }

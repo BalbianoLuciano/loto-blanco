@@ -40,4 +40,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(ChatMessage::class);
     }
+
+    public function flashcards(): HasMany
+    {
+        return $this->hasMany(Flashcard::class);
+    }
+
+    public function mastery(): HasMany
+    {
+        return $this->hasMany(Mastery::class);
+    }
+
+    public function dueFlashcards(): HasMany
+    {
+        return $this->flashcards()
+            ->where(fn ($q) => $q->where('state', 'new')->orWhere('due_at', '<=', now()));
+    }
 }

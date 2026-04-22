@@ -43,4 +43,9 @@ class Subject extends Model
     {
         return $this->hasMany(ChatMessage::class);
     }
+
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
 }
