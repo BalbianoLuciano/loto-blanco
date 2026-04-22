@@ -49,6 +49,8 @@ class EmbedChunksJob implements ShouldQueue
             });
 
             $this->document->update(['status' => 'ready']);
+
+            ExtractExercisesJob::dispatch($this->document);
         } catch (\Throwable $e) {
             Log::error('Embedding failed', [
                 'document_id' => $this->document->id,
